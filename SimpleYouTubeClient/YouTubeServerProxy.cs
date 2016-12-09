@@ -38,11 +38,48 @@ namespace SimpleYouTubeClient
 
         private string[] GetIdsOfAllUploadedVideos(string channelId)
         {
+            // Alle Videos eines Kanals befinden sich in der UploadsPlaylist. Davon benötigen
+            // wir erstmal die entsprechende Playlist-Id.
             string uploadPlaylistId = GetUploadsPlaylistId(channelId);
 
+            // Eine Playlist besteht aus Playlist-Items. Jedes PlaylistItem stellt einen Eintrag
+            // in der Playliste dar und enthält die Video-Id des referenzierten Videos.
+            PlaylistItem[] items = GetAllItems(uploadPlaylistId);
+
             Console.WriteLine("Die Upload-Playlist des Kanals {0} hat die Id {1}", channelId, uploadPlaylistId);
+            foreach (var playlistItem in items)
+            {
+                string videoId = playlistItem.Snippet.ResourceId.VideoId;
+                Console.WriteLine("PlaylistItem mit Id: {0} referenziert Video mit Id: {1}", playlistItem.Id, videoId);
+            }
 
             return null;
+        }
+
+        private PlaylistItem[] GetAllItems(string uploadPlaylistId)
+        {
+            List<PlaylistItem> result = new List<PlaylistItem>();
+             
+            var nextPageToken = "";
+            while (nextPageToken != null)
+            {
+                // wir stellen eine Anfrage für die ersten/nächsten 50 Items in der Playlist
+                var playlistItemsListRequest = ytService.PlaylistItems.List("snippet");
+                playlistItemsListRequest.PlaylistId = uploadPlaylistId;
+                playlistItemsListRequest.MaxResults = 50;
+                playlistItemsListRequest.PageToken = nextPageToken;
+
+                // Anfrage ausführen
+                var playlistItemsListResponse = playlistItemsListRequest.Execute();
+
+                // Die erhaltenen Items fügen wir der Liste hinzu.
+                result.AddRange(playlistItemsListResponse.Items);
+
+                // Nun können bei Bedarf die nächsten Items abgefragt werden
+                nextPageToken = playlistItemsListResponse.NextPageToken;
+            }
+
+            return result.ToArray();
         }
 
         private string GetUploadsPlaylistId(string channelId)
