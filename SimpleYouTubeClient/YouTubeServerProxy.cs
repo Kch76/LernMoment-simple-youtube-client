@@ -38,9 +38,31 @@ namespace SimpleYouTubeClient
 
         private string[] GetIdsOfAllUploadedVideos(string channelId)
         {
-            Console.WriteLine("GetIdsOfAllUploadedVideos to be implemented!");
+            string uploadPlaylistId = GetUploadsPlaylistId(channelId);
+
+            Console.WriteLine("Die Upload-Playlist des Kanals {0} hat die Id {1}", channelId, uploadPlaylistId);
 
             return null;
+        }
+
+        private string GetUploadsPlaylistId(string channelId)
+        {
+            // Details des Channels abrufen
+            var channelsListRequest = ytService.Channels.List("contentDetails");
+            channelsListRequest.Id = channelId;
+            var channelsListResponse = channelsListRequest.Execute();
+
+            // Die Antwort könnte theoretisch mehrere Kanäle enthalten, aber wir haben
+            // nach einer konkreten channelId gefragt. Also sollte auch nur ein channel
+            // in der Antwort enthalten sein!
+            var channel = channelsListResponse.Items[0];
+            if (channel == null)
+            {
+                throw new ApplicationException("Es wurde kein Kanal mit der ID: '" + channelId + "' gefunden!");
+            }
+            string uploadsListId = channel.ContentDetails.RelatedPlaylists.Uploads;
+
+            return uploadsListId;
         }
     }
 }
