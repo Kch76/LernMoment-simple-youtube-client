@@ -18,24 +18,24 @@ namespace SimpleYouTubeClient
             ytService = new YouTubeService(new BaseClientService.Initializer() { ApiKey = apiKey });
         }
 
-        public Video[] GetAllUploadedVideos(string channelId)
+        public List<Video> GetAllUploadedVideos(string channelId)
         {
             // Get ids of all uploaded videos from the channel
-            string[] videoIds = GetIdsOfAllUploadedVideos(channelId);
+            List<string> videoIds = GetIdsOfAllUploadedVideos(channelId);
 
             // Get core information of each video specified by id
-            Video[] allUploadedVideos = GetVideoDataForAllIds(videoIds);
+            List<Video> allUploadedVideos = GetVideoDataForAllIds(videoIds);
 
             return allUploadedVideos;
         }
 
-        private Video[] GetVideoDataForAllIds(string[] videoIds)
+        private List<Video> GetVideoDataForAllIds(IList<string> videoIds)
         {
             // Die API erlaubt im VideoListRequest die gewünschten VideoIds in einem string
             // anzugeben. Dabei müssen die einzelnen Ids durch Komma getrennt sein.
             // ACHTUNG: Es können nicht mehr als 50 Ids pro Execute verwendet werden!!!
             List<Video> result = new List<Video>();
-            int remainingVideosToLoad = videoIds.Length;
+            int remainingVideosToLoad = videoIds.Count;
 
             while (remainingVideosToLoad > 0)
             {
@@ -51,7 +51,9 @@ namespace SimpleYouTubeClient
                     remainingVideosToLoad = 0;
                 }
 
-                string allVideoIds = String.Join(",", videoIds, remainingVideosToLoad, amountOfVideosForThisIteration);
+                // ACHTUNG: Join mit startIndex und Count geht nur auf einem Array und
+                // nicht auf einer IList, obwohl es keine Fehler vom Compiler gibt!!!
+                string allVideoIds = String.Join(",", videoIds.ToArray(), remainingVideosToLoad, amountOfVideosForThisIteration);
 
                 // Anfrage erstellen um die Video-Daten zu erhalten
                 var request = ytService.Videos.List("snippet,status");
@@ -64,10 +66,10 @@ namespace SimpleYouTubeClient
                 result.AddRange(response.Items);
             }
 
-            return result.ToArray();
+            return result;
         }
 
-        private string[] GetIdsOfAllUploadedVideos(string channelId)
+        private List<string> GetIdsOfAllUploadedVideos(string channelId)
         {
             List<string> result = new List<string>();
 
@@ -77,17 +79,17 @@ namespace SimpleYouTubeClient
 
             // Eine Playlist besteht aus Playlist-Items. Jedes PlaylistItem stellt einen Eintrag
             // in der Playliste dar und enthält die Video-Id des referenzierten Videos.
-            PlaylistItem[] items = GetAllItems(uploadPlaylistId);
+            List<PlaylistItem> items = GetAllItems(uploadPlaylistId);
 
             foreach (var playlistItem in items)
             {
                 result.Add(playlistItem.Snippet.ResourceId.VideoId);
             }
 
-            return result.ToArray();
+            return result;
         }
 
-        private PlaylistItem[] GetAllItems(string uploadPlaylistId)
+        private List<PlaylistItem> GetAllItems(string uploadPlaylistId)
         {
             List<PlaylistItem> result = new List<PlaylistItem>();
              
@@ -110,7 +112,7 @@ namespace SimpleYouTubeClient
                 nextPageToken = playlistItemsListResponse.NextPageToken;
             }
 
-            return result.ToArray();
+            return result;
         }
 
         private string GetUploadsPlaylistId(string channelId)

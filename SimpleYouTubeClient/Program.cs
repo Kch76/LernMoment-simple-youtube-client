@@ -12,7 +12,7 @@ namespace SimpleYouTubeClient
         static void Main(string[] args)
         {
             YouTubeServerProxy proxy;
-            Video[] uploadedVideos;
+            List<Video> uploadedVideos;
 
             Console.WriteLine("### Willkommen zum SYT-Client! ###");
             Console.WriteLine();
@@ -27,7 +27,7 @@ namespace SimpleYouTubeClient
 
             Console.WriteLine();
             Console.WriteLine("*** Hier die gefundenen Videos: ***");
-            for (int i = 0; i < uploadedVideos.Length; i++)
+            for (int i = 0; i < uploadedVideos.Count; i++)
             {
                 Video current = uploadedVideos[i];
                 Console.WriteLine("{0}: Id: {1}, Name: {2}", i, current.Id, current.Snippet.Title);
