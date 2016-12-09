@@ -31,13 +31,46 @@ namespace SimpleYouTubeClient
 
         private Video[] GetVideoDataForAllIds(string[] videoIds)
         {
-            Console.WriteLine("GetVideoDataForAllIds to be implemented!");
+            // Die API erlaubt im VideoListRequest die gewünschten VideoIds in einem string
+            // anzugeben. Dabei müssen die einzelnen Ids durch Komma getrennt sein.
+            // ACHTUNG: Es können nicht mehr als 50 Ids pro Execute verwendet werden!!!
+            List<Video> result = new List<Video>();
+            int remainingVideosToLoad = videoIds.Length;
 
-            return null;
+            while (remainingVideosToLoad > 0)
+            {
+                int amountOfVideosForThisIteration = 0;
+                if (remainingVideosToLoad > 50)
+                {
+                    amountOfVideosForThisIteration = 50;
+                    remainingVideosToLoad -= 50;
+                }
+                else
+                {
+                    amountOfVideosForThisIteration = remainingVideosToLoad;
+                    remainingVideosToLoad = 0;
+                }
+
+                string allVideoIds = String.Join(",", videoIds, remainingVideosToLoad, amountOfVideosForThisIteration);
+
+                // Anfrage erstellen um die Video-Daten zu erhalten
+                var request = ytService.Videos.List("snippet,status");
+                request.Id = allVideoIds;
+
+                // Anfrage zum Server schicken
+                var response = request.Execute();
+
+                // Videos aus der Response holen und dem Resultat hinzufügen
+                result.AddRange(response.Items);
+            }
+
+            return result.ToArray();
         }
 
         private string[] GetIdsOfAllUploadedVideos(string channelId)
         {
+            List<string> result = new List<string>();
+
             // Alle Videos eines Kanals befinden sich in der UploadsPlaylist. Davon benötigen
             // wir erstmal die entsprechende Playlist-Id.
             string uploadPlaylistId = GetUploadsPlaylistId(channelId);
@@ -46,14 +79,12 @@ namespace SimpleYouTubeClient
             // in der Playliste dar und enthält die Video-Id des referenzierten Videos.
             PlaylistItem[] items = GetAllItems(uploadPlaylistId);
 
-            Console.WriteLine("Die Upload-Playlist des Kanals {0} hat die Id {1}", channelId, uploadPlaylistId);
             foreach (var playlistItem in items)
             {
-                string videoId = playlistItem.Snippet.ResourceId.VideoId;
-                Console.WriteLine("PlaylistItem mit Id: {0} referenziert Video mit Id: {1}", playlistItem.Id, videoId);
+                result.Add(playlistItem.Snippet.ResourceId.VideoId);
             }
 
-            return null;
+            return result.ToArray();
         }
 
         private PlaylistItem[] GetAllItems(string uploadPlaylistId)

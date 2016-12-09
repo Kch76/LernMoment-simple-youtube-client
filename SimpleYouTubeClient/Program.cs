@@ -24,6 +24,16 @@ namespace SimpleYouTubeClient
             Console.Write("Bitte gebe eine Channel-Id ein: ");
             string channelId = Console.ReadLine();
             uploadedVideos = proxy.GetAllUploadedVideos(channelId);
+
+            Console.WriteLine();
+            Console.WriteLine("*** Hier die gefundenen Videos: ***");
+            for (int i = 0; i < uploadedVideos.Length; i++)
+            {
+                Video current = uploadedVideos[i];
+                Console.WriteLine("{0}: Id: {1}, Name: {2}", i, current.Id, current.Snippet.Title);
+            }
+
+
             Console.ReadLine();
         }
     }
