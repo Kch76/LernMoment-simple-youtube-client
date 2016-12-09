@@ -17,12 +17,10 @@ namespace SimpleYouTubeClient
             Console.WriteLine("### Willkommen zum SYT-Client! ###");
             Console.WriteLine();
 
-            Console.Write("Bitte gebe deinen API-Key ein: ");
-            string apiKey = Console.ReadLine();
+            string apiKey = RequestApiKeyFromUser();
             proxy = new YouTubeServerProxy(apiKey);
 
-            Console.Write("Bitte gebe eine Channel-Id ein: ");
-            string channelId = Console.ReadLine();
+            string channelId = RequestChannelIdFromUser();
             uploadedVideos = proxy.GetAllUploadedVideos(channelId);
 
             Console.WriteLine();
@@ -35,6 +33,48 @@ namespace SimpleYouTubeClient
 
 
             Console.ReadLine();
+        }
+
+        private static string RequestApiKeyFromUser()
+        {
+            string key = Properties.Settings.Default.ApiKey;
+
+            Console.WriteLine("*** API Key Eingabe ***");
+            Console.Write("Soll der gespeichert ApiKey: {0} verwendet werden? (ja/nein): ", key);
+            string retrieveNewKey = Console.ReadLine();
+
+            if (retrieveNewKey.ToLower().Equals("nein"))
+            {
+                Console.Write("Bitte gib einen neuen ApiKey ein: ");
+                key = Console.ReadLine();
+
+                // neuen Wert in den Settings speichern
+                Properties.Settings.Default.ApiKey = key;
+                Properties.Settings.Default.Save();
+            }
+
+            return key;
+        }
+
+        private static string RequestChannelIdFromUser()
+        {
+            string id = Properties.Settings.Default.ChannelId;
+
+            Console.WriteLine("*** Channel Id Eingabe ***");
+            Console.Write("Soll die gespeicherte Channel Id: {0} verwendet werden? (ja/nein): ", id);
+            string retrieveNewId = Console.ReadLine();
+
+            if (retrieveNewId.ToLower().Equals("nein"))
+            {
+                Console.Write("Bitte gib eine neue ChannelId ein: ");
+                id = Console.ReadLine();
+
+                // neuen Wert in den Settings speichern
+                Properties.Settings.Default.ChannelId = id;
+                Properties.Settings.Default.Save();
+            }
+
+            return id;
         }
     }
 }

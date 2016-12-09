@@ -1,0 +1,12 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="SimpleYouTubeClient.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="ApiKey" Type="System.String" Scope="User">
+      <Value Profile="(Default)">unbekannt</Value>
+    </Setting>
+    <Setting Name="ChannelId" Type="System.String" Scope="User">
+      <Value Profile="(Default)">unbekannt</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
